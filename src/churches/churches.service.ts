@@ -7,7 +7,7 @@ export class ChurchesService {
   private churches = [];
   constructor() {}
 
-  findAll(name?: any) {
+  findAll(name?: string) {
     if (name) {
       return this.churches.filter((church) => church.name.includes(name));
     }

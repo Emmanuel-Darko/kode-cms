@@ -4,23 +4,49 @@ import { UpdateMemberDto } from './dto/update-member.dto';
 
 @Injectable()
 export class MembersService {
+  private members = [];
+  constructor() {}
+
+  findAll(name?: string) {
+    if (name) {
+      return this.members.filter((member) => member.name.includes(name));
+    }
+    return this.members;
+  }
+
+  findOne(id: string) {
+    const findMember = this.members.find((member) => member?.id == id);
+    if (findMember) return findMember;
+    else throw new Error('Member not found!');
+  }
+
   create(createMemberDto: CreateMemberDto) {
-    return 'This action adds a new member';
+    const findMember = this.members.find(
+      (member) =>
+        member.email == createMemberDto.email ||
+        member.phone == createMemberDto.phone,
+    );
+    if (!findMember) {
+      const memId: string = Math.floor(Math.random() * 100000).toString();
+      this.members.push({ id: memId, ...createMemberDto });
+      return this.findOne(memId);
+    } else {
+      throw new Error('Member already exists');
+    }
   }
 
-  findAll() {
-    return `This action returns all members`;
+  update(id: string, updateMemberDto: UpdateMemberDto) {
+    this.members = this.members.map((member) => {
+      if (member.id == id) {
+        return { ...member, updateMemberDto };
+      }
+      return member;
+    });
+    return this.findOne(id);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} member`;
-  }
-
-  update(id: number, updateMemberDto: UpdateMemberDto) {
-    return `This action updates a #${id} member`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} member`;
+  remove(id: string) {
+    this.members = this.members.filter((member) => member?.id == id);
+    return this.findAll();
   }
 }

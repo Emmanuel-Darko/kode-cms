@@ -19,7 +19,7 @@ export class ChurchesController {
   constructor(private readonly churchesService: ChurchesService) {}
 
   @Get()
-  findAll(@Query('name') name: any) {
+  findAll(@Query('name') name: string) {
     return this.churchesService.findAll(name);
   }
 

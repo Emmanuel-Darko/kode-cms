@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  NotFoundException,
+  NotAcceptableException,
 } from '@nestjs/common';
 import { ChurchesService } from './churches.service';
 import { CreateChurchDto } from './dto/create-church.dto';
@@ -15,28 +18,44 @@ import { UpdateChurchDto } from './dto/update-church.dto';
 export class ChurchesController {
   constructor(private readonly churchesService: ChurchesService) {}
 
-  @Post()
-  create(@Body() createChurchDto: CreateChurchDto) {
-    return this.churchesService.create(createChurchDto);
-  }
-
   @Get()
-  findAll() {
-    return this.churchesService.findAll();
+  findAll(@Query('name') name: any) {
+    return this.churchesService.findAll(name);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.churchesService.findOne(+id);
+    try {
+      return this.churchesService.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`${error}`);
+    }
+  }
+
+  @Post()
+  create(@Body() createChurchDto: CreateChurchDto) {
+    try {
+      return this.churchesService.create(createChurchDto);
+    } catch (error) {
+      throw new NotAcceptableException(`${error}`);
+    }
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateChurchDto: UpdateChurchDto) {
-    return this.churchesService.update(+id, updateChurchDto);
+    try {
+      return this.churchesService.update(id, updateChurchDto);
+    } catch (error) {
+      throw new NotFoundException(`${error}`);
+    }
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.churchesService.remove(id);
+    try {
+      return this.churchesService.remove(id);
+    } catch (error) {
+      throw new NotFoundException(`${error}`);
+    }
   }
 }

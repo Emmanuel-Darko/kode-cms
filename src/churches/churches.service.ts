@@ -2,48 +2,49 @@ import { Injectable } from '@nestjs/common';
 import { CreateChurchDto } from './dto/create-church.dto';
 import { UpdateChurchDto } from './dto/update-church.dto';
 
-let churches = [];
-
 @Injectable()
 export class ChurchesService {
+  private churches = [];
+  constructor() {}
+
+  findAll(name?: any) {
+    if (name) {
+      return this.churches.filter((church) => church.name.includes(name));
+    }
+    return JSON.stringify(this.churches);
+  }
+
+  findOne(id: string) {
+    const findChurch = this.churches.find((church) => church?.id == id);
+    if (findChurch) return JSON.stringify(findChurch);
+    else throw new Error(`No Church exists!`);
+  }
+
   create(createChurchDto: CreateChurchDto) {
-    const findChurchExist = churches.find(
+    const findChurchExist = this.churches.find(
       (church) => church.email == createChurchDto.email,
     );
 
     if (!findChurchExist) {
       const genId: string = (Math.random() * 1000000).toString();
       const church = { id: genId, ...createChurchDto };
-      return churches.push(church);
-    } else {
-      return 'Church already registered';
-    }
+      this.churches.push(church);
+      return this.findOne(genId);
+    } else throw new Error('Church already exists');
   }
 
-  findAll() {
-    return JSON.stringify(churches);
-  }
-
-  findOne(id: number) {
-    const findChurch = churches.find((church) => church?.id == id);
-    if (findChurch) {
-      return JSON.stringify(findChurch);
-    }
-    return 'Church not Found!';
-  }
-
-  update(id: number, updateChurchDto: UpdateChurchDto) {
-    churches = churches.map((church) => {
+  update(id: string, updateChurchDto: UpdateChurchDto) {
+    this.churches = this.churches.map((church) => {
       if (church.id == id) {
         return { ...church, ...updateChurchDto };
       }
       return church;
     });
-    return JSON.stringify(churches); //return user when using entity
+    return this.findOne(id);
   }
 
   remove(id: string) {
-    churches = churches.filter((church) => church?.id !== id);
-    return JSON.stringify(churches);
+    this.churches = this.churches.filter((church) => church?.id !== id);
+    return this.findAll();
   }
 }
